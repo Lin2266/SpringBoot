@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 此檔要放在src/main/resources底下，跟properties一起 -->
+
+
+<!-- <configuration> 的 scan 設定為 true 使配置改變時可以重新載入配置文件 -->
+<configuration>
+<!-- 	application.properties的參數要加debug = true -->
+<!--     <property name="HOME_LOG" value="D:/logs/app.log"/> -->
+		<property name="HOME_LOG" value="./target/log-dev/logFile.log"/>
+    
+	<!-- 設定印出 console 時的相關設定 -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+    	<layout class="ch.qos.logback.classic.PatternLayout">
+    		<Pattern>
+    			%d %-5level [%thread] %logger{0}: %msg%n
+    		</Pattern>
+    	</layout>
+    </appender>
+
+    <!-- 設定輸出 file 時的相關設定 -->
+    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${HOME_LOG}</file>
+		<!-- 透過不同啟動環境，來決定要使用哪一份 springProfile -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+<!-- 			<fileNamePattern>D:/logs/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern> -->
+			 <fileNamePattern>./target/log-dev/logFile.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each archived file, size max 10MB -->
+            <maxFileSize>10MB</maxFileSize>
+            <!-- total size of all archive files, if total size > 20GB, 
+				it will delete old archived file -->
+            <totalSizeCap>20GB</totalSizeCap>
+            <!-- 60 days to keep -->
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+		<!-- 設定寫入 Log File 的格式設定 -->
+        <encoder>
+            <charset>utf-8</charset>
+            <Pattern>%d %-5level [%thread] %logger{0}: %msg%n</Pattern>
+        </encoder>
+    </appender>
+     
+	
+	<!-- 配置載入位置 -->
+	<!-- 設定 ROOT 的 Log 等級，避免這個值改為 DEBUG，否則會印出許多啟動容器時不必要的資訊 -->
+	<root level="INFO">
+        <appender-ref ref="FILE-ROLLING"/>
+        <!-- 載入名字為 CONSOLE 的 <appender> -->
+        <appender-ref ref="Console"/>
+    </root>
+    
+    <logger name="com.example.demo" level="debug" additivity="false">
+        <appender-ref ref="FILE-ROLLING"/>
+		<!-- <appender-ref ref="Console"/> -->
+    </logger>
+
+    
+
+</configuration>

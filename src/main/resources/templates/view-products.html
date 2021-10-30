@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<title>使用 jQuery AJAX 使用 RESTful Web 服務</title>
+<script type="text/javascript">
+	$(document).ready(function(){
+	   $.getJSON("http://localhost:8080/products", function(result){
+	      $.each(result, function(key,value) {
+	         $("#productsJson").append(value.id+" "+value.name+" ");
+	      }); 
+	   });
+	});
+</script>
+</head>
+
+<body>
+	<P id="productsJson"></P>
+</body>
+</html>

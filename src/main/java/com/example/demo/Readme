@@ -1,0 +1,227 @@
+github-token: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
+
+chrome無法連http://localhost:8080/時，清除cookie
+
+日常開發中至少有三個環境，分別是開發環境（dev），測試環境（test），生產環境（prod）。
+
+---------創建一個可執行的 JAR
+
+ide的專案要先停止，在專案目錄裡打指令
+D:\EclipseJavaProject\SpringBoot>mvn clean install
+D:\EclipseJavaProject\SpringBoot\target>dir 就會有jar檔在裡面
+
+使用命令java –jar <JARFILE>運行 JAR 文件。觀察到在上面的例子中，JAR 文件被命名為demo-0.0.1-SNAPSHOT.jar
+D:\EclipseJavaProject\SpringBoot\target>java -jar SpringBoot-0.0.1-SNAPSHOT.jar
+
+關閉cmd指令執行的jar服務，直接把cmd視窗關閉就好。
+
+---------Spring Boot Servlet 初始化程序
+傳統的部署方式是讓 Spring Boot Application @SpringBootApplication類擴展SpringBootServletInitializer類。
+Spring Boot Servlet Initializer 類文件允許您在使用 Servlet 容器啟動應用程序時對其進行配置。
+我們需要擴展類SpringBootServletInitializer以支持 WAR 文件部署。
+
+將打包 JAR 更新為 WAR
+pom.xml要加<packaging>war</packaging>
+指令D:\EclipseJavaProject\SpringBoot>mvn package
+
+---------Command Line Properties命令行屬性更改Tomcat端口號
+D:\EclipseJavaProject\SpringBoot\target>java -jar SpringBoot-0.0.1-SNAPSHOT.jar --server.port=9090
+
+---------Properties File屬性檔application.properties更改Tomcat端口號
+server.port = 9090
+spring.application.name = demoservice
+
+---------外部屬性檔application.properties更改Tomcat端口號
+D:\EclipseJavaProject\SpringBoot\target>java -jar -Dspring.config.location = C:\application.properties SpringBoot-0.0.1-SNAPSHOT.jar
+
+
+---------@Value註解的使用
+@Value 註解用於讀取 Java 代碼中的環境或應用程序屬性值。讀取屬性值的語法
+
+---------自動配置
+Spring Boot Auto Configuration 根據您在項目中添加的 JAR 依賴項自動配置您的 Spring 應用程序。
+例如，如果 MySQL 數據庫在您的類路徑上，但您還沒有配置任何數據庫連接，那麼 Spring Boot 
+會自動配置一個內存數據庫。
+
+為此，您需要在主類文件中添加@EnableAutoConfiguration註解或@SpringBootApplication註解。
+然後，您的 Spring Boot 應用程序將被自動配置。
+
+
+---------Spring Boot 應用程序
+Spring Boot Application 的入口點是包含@SpringBootApplication註解的類。
+這個類應該有運行 Spring Boot 應用程序的 main 方法。@SpringBootApplication註解包括自動配置
+、組件掃描和 Spring Boot 配置。
+
+如果在類中添加了@SpringBootApplication註解，則不需要添加@EnableAutoConfiguration、
+@ ComponentScan和@SpringBootConfiguration註解。該@SpringBootApplication註釋包括所有其他的註解。
+
+---------@ComponentScan組件掃描
+在 Spring Boot 中，我們可以使用 Spring Framework 來定義我們的 bean 及其依賴注入。
+該@ComponentScan註釋用於查找Bean，然後將相應的注射@Autowired註解。
+如果您遵循 Spring Boot 典型佈局，則無需為@ComponentScan註釋指定任何參數。
+所有組件類文件都會自動註冊到 Spring Beans。
+
+@SpringBootApplication
+public class DemoApplication {
+@Autowired
+   RestTemplate restTemplate;
+   
+   public static void main(String[] args) {
+      SpringApplication.run(DemoApplication.class, args);
+   }
+   @Bean
+   public RestTemplate getRestTemplate() {
+      return new RestTemplate();   
+   }
+}
+
+---------RESTful Web Services
+Representational State Transfer(代表性狀態轉移)，簡稱REST，它是一種網路架構風格，他並不是一種標準。
+而 RESTful 可以這樣子想像: 美麗 (Beauty) 的事物可以稱為 Beautiful; 設計為 REST 的系統就可以稱為 RESTful。
+以 API 而言，假設我們正在撰寫一組待辦事項的 API，
+可能會有以下方式來作為 API 的 interface:
+
+獲取使用者資料 /getAllUsers
+獲取使用者資料 /getUser/1
+新增使用者資料 /createUser
+更新使用者資料 /updateUser/1
+刪除使用者資料 /deleteUser/1
+
+若是以 REST 風格來開發 RESTful API 的話:
+
+獲取使用者資料 /GET /users
+獲取使用者資料 /GET /user/1
+新增使用者資料 /POST /user
+更新使用者資料 /PUT /user/1
+刪除使用者資料 /DELETE /user/1
+
+兩者差異是在於 RESTful API 充分地使用了 HTTP protocol (GET/POST/PUT/DELETE)，達到:
+
+以直觀簡潔的資源 URI
+並且善用 HTTP Verb
+達到對資源的操作
+並使用 Web 所接受的資料類型: JSON, XML, YAML 等，最常見的是 JSON
+通常是使用 HTTP, URI, JSON, HTML 這些現有廣泛流行的協議和標準，且使用 HTTP status code 來代表該資源的狀態。
+框架中強制使用 REST 風格的最有名的應該就是 Ruby on Rails 了!
+p.s. 因為 REST 並非是一種標準，因此有時候也不一定非得要照著 REST 來做，
+只是在資源的操作面上，可以設計成這類的風格，以達到簡潔易懂，並且可重用。
+---------@RestController
+@RestController 註釋用於定義 RESTful Web 服務。它提供 JSON、XML 和自定義響應。
+
+---------@RequestMapping
+@RequestMapping 註釋用於定義請求 URI 以訪問 REST 端點。我們可以定義 Request 方法來消費和生產對象。默認的請求方法是 GET。
+
+---------@RequestBody
+@RequestBody 註解用於定義請求正文內容類型。
+
+---------@PathVariable
+@PathVariable 註釋用於定義自定義或動態請求 URI。請求 URI 中的 Path 變量定義為花括號 {}
+
+---------@RequestParam
+@RequestParam 註解用於從請求 URL 中讀取請求參數。默認情況下，它是必需參數。我們還可以為請求參數設置默認值
+
+---------Exception例外
+1.ProductNotfoundException
+繼承例外。
+2.ProductExceptionController
+@ControllerAdvice 用於全局處理異常。
+@ExceptionHandler 用於處理特定的異常並向客戶端發送自定義響應。
+3.ProductServiceController
+在更新產品時，如果沒有找到產品，則由ProductExceptionController返迴響應錯誤訊息"Product not found"。
+if(!productRepo.containsKey(id)) throw new ProductNotfoundException();
+
+---------Interceptor攔截器
+在向控制器發送請求之前。
+在向客戶端發送響應之前。
+
+例如，您可以使用攔截器在向控制器發送請求之前添加請求頭，並在向客戶端發送響應之前添加響應頭。
+要使用攔截器，您需要創建支持它的@Component類，並且它應該實現HandlerInterceptor接口。
+以下是您在使用攔截器時應該了解的三種方法 -
+preHandle()方法 - 用於在將請求發送到控制器之前執行操作。此方法應返回 true 以將響應返回給客戶端。
+postHandle()方法 - 用於在向客戶端發送響應之前執行操作。
+afterCompletion()方法 - 用於在完成請求和響應後執行操作。
+
+1.ProductServiceInterceptor implements HandlerInterceptor
+2.ProductServiceInterceptorAppConfig implements WebMvcConfigurer
+or
+  ProductServiceInterceptorAppConfig2 extends WebMvcConfigurationSupport
+
+---------Filter過濾器
+SimpleFilter implements Filter
+
+---------Tomcat 端口號
+application.properties
+or
+application.yml
+
+server.port號為 0，則 Tomcat 使用隨機端口號。
+
+---------Rest Template
+Rest 模板用於創建使用 RESTful Web 服務的應用程序。您可以使用exchange()方法為所有 HTTP 方法使用 Web 服務。
+使用 RestTemplate - exchange() 方法使用 GET API。
+您必須遵循給定的要點才能使用 API -
+
+自動裝配 Rest 模闆對象。
+使用 HttpHeaders 設置請求標頭。
+使用 HttpEntity 包裝請求對象。
+為 Exchange() 方法提供 URL、HttpMethod 和返回類型。
+
+---------Thymeleaf 模板
+html文件應該放在templates目錄下，
+所有的JS和CSS文件都應該放在classpath的static目錄下。
+
+---------實現跨網域請求 CORS
+一、前言
+因為安全性的關係，瀏覽器預設都會限制跨網域請求。如果今天有這方面的需求，就需要開放一個對應的API連線，
+而CORS就是一個瀏覽器要做跨網域請求的規範。
+
+1.在SpringBoot中，有四種方法可以實作CORS方式
+一.CorsFilter(全域跨網域)
+二.覆寫WebMvcConfigurer
+三.使用Annotation(@CrossOrigin)
+四.手動設定response header
+
+2-1.CorsFilter(全域跨網域)
+在環境配置設置一個JavaConfig Bean
+2-2.覆寫WebMvcConfigurer
+2-3.使用Annotation(@CrossOrigin )
+在MVC Controller中，可以在方法上(@RequestMapping）使用註解 @CrossOrigin
+也可以在Controller（@Controller）上使用註解 @CrossOrigin
+2-4手動設定response header
+
+---------啟用 HTTPS Enabling HTTPS
+在cmd執行:
+keytool -genkey -alias tomcat -storetype PKCS12 -keyalg RSA -keysize 2048 -keystore keystore.p12 -validity 3650
+
+輸入金鑰儲存庫密碼:
+重新輸入新密碼:
+
+以下可以按enter略過
+您的名字與姓氏為何？
+  [Unknown]:
+您的組織單位名稱為何？
+  [Unknown]:
+您的組織名稱為何？
+  [Unknown]:
+您所在的城市或地區名稱為何？
+  [Unknown]:
+您所在的州及省份名稱為何？
+  [Unknown]:
+此單位的兩個字母國別代碼為何？
+  [Unknown]:
+
+CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown 正確嗎？
+  [否]:  y
+
+檔案會在C:\Users\User底下有個keystore.p12，將檔案放在專案的src/main/resources/ssl底下
+application.properties的設定:
+
+server.port: 443
+server.ssl.key-store: classpath:ssl/keystore.p12
+server.ssl.key-store-password: springboot
+server.ssl.keyStoreType: PKCS12
+server.ssl.keyAlias: tomcat
+
+---------Eureka 服務器
+Eureka Server 是一個保存所有客戶端服務應用程序信息的應用程序。每個微服務都會註冊到 Eureka 服務器，
+Eureka 服務器知道每個端口和 IP 地址上運行的所有客戶端應用程序。Eureka 服務器也稱為發現服務器。

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- 日誌格式 -->
+    <!-- %m輸出的資訊,%p日誌級別,%t執行緒名,%d日期,%c類的全名,%i索引【從數字0開始遞增】 -->
+	<!-- %d{HH: mm:ss.SSS}——日誌輸出時間 -->
+	<!-- %thread——輸出日誌的程序名字，這在Web應用以及非同步任務處理中很有用 -->
+	<!-- %-5level——日誌級別，並且使用5個字元靠左對齊 -->
+	<!-- %logger{36}——日誌輸出者的名字 -->
+	<!-- %msg——日誌訊息 -->
+	<!-- %n——平臺的換行符 -->
+	
+    <!-- appender是configuration的子節點，是負責寫日誌的元件。 -->
+    <!-- ConsoleAppender：把日誌輸出到控制檯 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %p (%file:%line\)- %m%n</pattern>
+            <!-- 控制檯也要使用UTF-8，不要使用GBK，否則會中文亂碼 -->
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+    <!-- RollingFileAppender：滾動記錄檔案，先將日誌記錄到指定檔案，當符合某個條件時，將日誌記錄到其他檔案 -->
+    <!-- 以下的大概意思是：1.先按日期存日誌，日期變了，將前一天的日誌檔名重新命名為XXX%日期%索引，新的日誌仍然是sys.log -->
+    <!--             2.如果日期沒有發生變化，但是當前日誌的檔案大小超過1KB時，對當前日誌進行分割 重新命名-->
+    <appender name="syslog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>log/sys.log</File>
+        <!-- rollingPolicy:當發生滾動時，決定 RollingFileAppender 的行為，涉及檔案移動和重新命名。 -->
+        <!-- TimeBasedRollingPolicy： 最常用的滾動策略，它根據時間來制定滾動策略，既負責滾動也負責出發滾動 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 活動檔案的名字會根據fileNamePattern的值，每隔一段時間改變一次 -->
+            <!-- 檔名：log/sys.2017-12-05.0.log -->
+            <fileNamePattern>log/sys.%d.%i.log</fileNamePattern>
+            <!-- 每產生一個日誌檔案，該日誌檔案的儲存期限為30天 -->
+            <maxHistory>30</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- maxFileSize:這是活動檔案的大小，預設值是10MB,本篇設定為1KB，只是為了演示 -->
+                <maxFileSize>1KB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <!--日誌輸出編碼格式化-->
+        <encoder>
+            <!-- pattern節點，用來設定日誌的輸入格式 -->
+            <pattern>
+                %d %p (%file:%line\)- %m%n    
+            </pattern>
+            <!-- 記錄日誌的編碼 -->
+            <charset>UTF-8</charset><!-- 此處設定字符集 -->
+        </encoder>
+    </appender>
+    <!-- 控制檯輸出日誌級別 -->
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+    <!-- 指定專案中某個包，當有日誌操作行為時的日誌記錄級別 -->
+    <!-- com.appley為根包，也就是隻要是發生在這個根包下面的所有日誌操作行為的許可權都是DEBUG -->
+    <!-- 級別依次為【從高到低】：FATAL > ERROR > WARN > INFO > DEBUG > TRACE  -->
+    <logger name="com.appleyk" level="DEBUG">
+        <appender-ref ref="syslog"/>
+    </logger>
+</configuration>
